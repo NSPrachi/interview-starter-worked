@@ -1,0 +1,192 @@
+<div class="mat-elevation-z8" *ngIf="!loading" >
+    <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows class="mat-elevation-z8">
+        <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+            <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+            <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+          </ng-container>
+          <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element);onEdit(element);$event.stopPropagation()">
+                <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+                <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+              </button>
+            </td>
+        </ng-container>
+        <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+        <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+            <div class="example-element-detail"
+                [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                <div class="example-element-diagram" *ngIf="userToBeUpdated">     
+                        <form #f="ngForm" (ngSubmit)="onEditUpdate(f)">
+                        <div class="example-element-firstName">
+                            <div>
+                                <label>FirstName</label>
+                                <input type="text" name="firstName" class="form-control" [(ngModel)]="userToBeUpdated.firstName" />
+                            </div> 
+                        </div>
+                        <div class="example-element-lastName">
+                            <div>
+                                <label>LastName</label>
+                                <input type="text" name="lastName"  class="form-control" [(ngModel)]="userToBeUpdated.lastName" />
+                            </div>
+                        </div>
+                        <div class="example-element-maidenName"> 
+                            <div>
+                                <label>MaidenName</label>
+                                <input type="text" name="maidenName" class="form-control" [(ngModel)]="userToBeUpdated.maidenName" />
+                            </div>
+                        </div>
+                        <div class="example-element-age"> 
+                            <div>
+                                <label>Age</label>
+                                <input type="text" name="age" class="form-control" [(ngModel)]="userToBeUpdated.age" />
+                            </div> 
+                        
+                        </div>
+                        <div class="example-element-submit"> 
+                            <div>  
+                                <button type="submit" class="btn btn-primary"   >Save</button>                                
+                            </div> 
+                        
+                        </div>
+                        </form>
+                </div>
+            </div>
+            </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+        <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+            class="example-element-row"
+            [class.example-expanded-row]="expandedElement === element"
+            (click)="expandedElement = expandedElement === element ? null : element">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+    </table>
+  
+    <mat-paginator [length]="100"
+    [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
+                   showFirstLastButtons
+                   aria-label="Select page of periodic elements">
+    </mat-paginator>
+  </div>
+  <div *ngIf="loading" 
+   style="display: flex; justify-content: center; align-items: center; background: white;">
+    <mat-progress-spinner color="primary" mode="indeterminate">
+    </mat-progress-spinner>
+  </div>
+<!-- <div class="container mt-2">
+    <div class="row ">
+        <div class="col" >
+        
+            <div class="row border border-dark">
+            
+            <h5 class="card-title">User Management</h5>
+            </div>
+            
+            <div class="row border border-dark">
+                <div class="col-xl-12 table-responsive" style="padding: 3%;">
+                    <div class="row">
+                        <div class="col-xl-12 border border-dark" >
+                            <table class="table table-striped border-dark">
+                                <thead>
+                                  <tr>
+                                    <th></th>
+                                    <th>FirstName</th>
+                                    <th>LastName</th>
+                                    <th>MaidenName</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>BirthDate</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <ng-container *ngFor="let user of (users$ | async).users">
+                                    <tr data-toggle="collapse" [attr.data-target]="'#' + user.id" class="clickable">
+                                        <td style="cursor: pointer;" (click)="onEdit(+user.id,user)"><span class="caret">Edit</span></td>
+                                        <td>{{ user.firstName }}</td>
+                                        <td>{{ user.lastName }}</td>
+                                        <td>{{ user.maidenName }}</td>
+                                        <td>{{ user.age }}</td>
+                                        <td>{{ user.gender }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.phone }}</td>
+                                        <td>{{ user.birthDate }}</td>                           
+                                      </tr>
+                                      <tr *ngIf="hideRuleContent[+user.id]" id="{{user.id}}" class="">
+                                        <td colspan="4">
+                                          <div class="details">
+                                            <p>Edit User</p>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="firstName">FirstName</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="lastName">LastName</label> 
+                                                    <input type="text" class="form-control" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="maidenName">MaidenName</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="age">Age</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>    
+                                            </td>
+                                          </div>
+                                          <div class=" details">
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="gender">Gender</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="email">Email</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="phone">Phone</label> 
+                                                    <input type="text" class="form-control"  />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <label for="birthDate">BirthDate</label> 
+                                                    <input type="date" class="form-control"  />
+                                                </div>
+                                            </td>  
+                                          </div>
+                                            <button class="btn btn-sm btn-primary" (click)="onSave()" [disabled]="onsaving" *ngIf="!onsaving">Save</button>
+                                            <button class="btn btn-sm btn-primary" [disabled]="onsaving" *ngIf="onsaving"><div class="spinner-border spinner-border-sm"></div></button>
+                                            <button class="btn btn-sm btn-danger" (click)="onEdit(+user.id)"  [disabled]="onsaving">Cancel</button>
+                                        </td>
+                                      </tr>
+                                  </ng-container>
+                                  
+                                  
+                                </tbody>
+                              </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        
+        </div>
+    </div>
+</div> -->
